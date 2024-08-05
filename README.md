@@ -1,0 +1,1 @@
+FocalMechanismPolarityEditor-GUI-SkHASH. Run SkHASH using a GUI, check polarities by plotting beachball with stations and waveforms side-by-side, edit and re-run skhash for improving Fault plane solution quality.
