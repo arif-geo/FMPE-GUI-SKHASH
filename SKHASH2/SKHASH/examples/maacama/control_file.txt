@@ -1,0 +1,61 @@
+## Control file example for Maacama
+
+$input_format  # format of input files
+SKHASH
+
+$conpfile        # P-polarity input filepath
+examples/maacama/IN/pol_consensus.csv
+
+$stfile        # station list filepath
+examples/maacama/IN/station.csv
+
+$outfile1      # focal mechanisms output filepath
+examples/maacama/OUT/out.csv
+
+$outfile_pol_agree  # record of polarity (dis)agreeement output filepath
+examples/maacama/OUT/out_polagree.csv
+
+$outfile_pol_info
+examples/maacama/OUT/out_polinfo.csv
+
+$vmodel_paths  # whitespace/newline delimited list of paths to the velocity models
+examples/velocity_models/mvel.txt
+
+$output_angle_precision
+4
+
+$require_network_match
+False
+
+$allow_duplicate_stations
+True
+
+$min_polarity_weight
+0
+
+$dang          # minimum grid spacing (degrees)
+5
+
+$nmc           # number of trials (e.g., 30)
+30
+
+$maxout        # max num of acceptable focal mech. outputs (e.g., 500)
+500
+
+$ratmin        # minimum allowed signal to noise ratio
+3
+
+$badfrac       # fraction polarities assumed bad
+0.1
+
+$qbadfrac      # assumed noise in amplitude ratios, log10 (e.g. 0.3 for a factor of 2)
+0.3
+
+$delmax        # maximum allowed source-receiver distance in km.
+140
+
+$cangle        # angle for computing mechanisms probability
+45
+
+$prob_max      # probability threshold for multiples (e.g., 0.1)
+0.2

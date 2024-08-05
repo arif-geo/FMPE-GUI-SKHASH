@@ -1,0 +1,5 @@
+station,location,channel,start_time,end_time
+AL1,  --, DPZ, 1900-01-01, 2200-01-01
+GHGB, 01, EHZ, 1900-01-01, 2200-01-01
+GSN,  01, EHZ, 1900-01-01, 2200-01-01
+HBW,  --, DPZ, 1900-01-01, 2200-01-01
