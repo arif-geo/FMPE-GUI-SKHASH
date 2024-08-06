@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import QApplication
 # Import sef-defined modules
 from fun_beachball_widget import MainApp
 
-user = 'mdarifulislam'
+# user = 'mdarifulislam'
+user = 'mdaislam'
 
 # Define the paths (Use absolute paths in most cases)
 file_dir      = f'/Users/{user}/Library/CloudStorage/OneDrive-IndianaUniversity/Research/Github/FM2STRESS/FM2STRESS_project/data/NCEDC_picks/HASH_IN_OUT'
@@ -16,7 +17,8 @@ pol_agree_path= os.path.join(file_dir, 'OUT/out_polagree_NC_PN_QC_2008.csv')
 pol_path      = os.path.join(file_dir, 'IN/pol_concensus_NC_PN_QC_2008.csv')
 stn_path      = os.path.join(file_dir, 'IN/station_master.csv')
 pick_pol_path = f'/Users/{user}/Library/CloudStorage/OneDrive-IndianaUniversity/Research/Data/NCEDC_events_data/Markers/2008_pyrocko_markers_filt.csv'
-skhash_root_dir = os.path.abspath('FM2STRESS_project/code/InteractiveFM/SKHASH2/SKHASH')
+eq_cat_path   = os.path.join(file_dir, '../NCEDC_eq_cat_above_slab.csv')
+skhash_root_dir = os.path.abspath('SKHASH2/SKHASH')
 
 # Make app and window for beachball plot
 app = QApplication([])
@@ -29,11 +31,14 @@ input_params = {
     'pol_agree_path': pol_agree_path,# (outfile_pol_agree) SKHASH output polarities with agreement
     'stn_path': stn_path,           # Master station csv (SKHASH format)
     'pick_pol_path': pick_pol_path, # phase picks and polarities csv (converted from pyrocko markers, filtered)
+    'eq_cat_path': eq_cat_path,     # Earthquake catalog csv
     'mseed_dir': mseed_dir,
     'hor_line': True,
     'zoom': 2,
     'slice_len': 0.5,
     'normalize': True,
+    # beachball plot parameters
+    'acceptable_sdr': True,
     # SKHASH control file parameters
     'vmodel_paths': os.path.join(skhash_root_dir, 'examples/velocity_models_MTJ/vz_MTJ.txt'),
     'max_agap': 170,

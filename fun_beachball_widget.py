@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from PyQt5.QtCore import Qt, pyqtSignal
 # from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QSplitter, QFrame
 from PyQt5.QtWidgets import *
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+
 from obspy import read, UTCDateTime
 
 # Custom modules
@@ -15,7 +17,7 @@ from fun_makefile_run_SKHASH import RerunSKHASH
 class BeachballPlot(QWidget):
     clicked_station_signal = pyqtSignal(str, str)  # Define signal for clicked station
 
-    def __init__(self, mech_df=None, alt_mech_df=None, pol_df=None, pol_info_df=None):
+    def __init__(self, mech_df=None, alt_mech_df=None, pol_df=None, pol_info_df=None, **kwargs):
         super().__init__()
 
         self.mech_df = mech_df
@@ -24,11 +26,14 @@ class BeachballPlot(QWidget):
         self.pol_info_df = pol_info_df
 
         # Plot the mechanism using pre-defined data
-        fig, ax, sc_up, sc_down, xy_data, event_id = plot_mech(self.mech_df, self.pol_df, self.pol_info_df, self.alt_mech_df)
+        fig, ax, sc_up, sc_down, sc_zero, xy_data, event_id = plot_mech(
+            self.mech_df, self.pol_df, self.pol_info_df, self.alt_mech_df, **kwargs)
+
         self.fig = fig
         self.ax = ax
         self.sc_up = sc_up
         self.sc_down = sc_down
+        self.sc_zero = sc_zero
         self.xy_data = xy_data
         self.event_id = event_id
 
@@ -36,14 +41,19 @@ class BeachballPlot(QWidget):
         self.fig.canvas.mpl_connect('pick_event', self.onpick)
 
         layout = QVBoxLayout(self)
+        self.canvas = FigureCanvasQTAgg(self.fig)
         layout.addWidget(self.fig.canvas)
+
+        # Add the navigation toolbar
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        layout.addWidget(self.toolbar)
         self.setLayout(layout)
 
     def onpick(self, event):
         '''
         Station_name full station name (e.g. 'NC.PFO..EHZ' not just 'PFO')
         '''
-        if event.artist in [self.sc_up, self.sc_down]:  # Check if clicked on beachball collection
+        if event.artist in [self.sc_up, self.sc_down, self.sc_zero]:  # Check if clicked on beachball collection
             point = event.artist.get_offsets()[event.ind[0]]
             # clicked_station = get_exact_station(point, self.xy_data, self.pol_info_df)
             clicked_station = get_nearest_station(point, self.xy_data, self.pol_info_df)
@@ -92,11 +102,16 @@ class WaveformPlot(QWidget):
 
             self.ax.clear()
             self.ax.plot(xtime, tr.data)                                # Plot waveform
-            self.ax.axvline(x=phase_time - tr.stats.starttime, color='r', linestyle='--')    # plot vertical line at phase pick time
+            self.ax.axvline(x=phase_time - tr.stats.starttime, color='r', linestyle='--', lw=0.5)    # plot vertical line at phase pick time
             self.ax.text(phase_time - tr.stats.starttime - 0.5, 0.5, f"{tr.id}\nPol:{pick_df['phase_polarity'].values[0]}\nIdx{pick_df_idx}", fontsize=8)
             if hor_line:
                 self.ax.axhline(y=0, color='k', linestyle='--', lw=0.5)
             self.ax.set_title(f'Waveform for Event {event_id}, Station {station_name}')
+            self.ax.set_ylim(-1.5, 1.5)
+            self.ax.set_xlabel('Time (s)')
+            self.ax.set_ylabel('Amplitude [Normalized]')
+            # tight_layout() 
+            self.fig.tight_layout()
         else:
             # Empty plot
             self.ax.clear()
@@ -156,7 +171,7 @@ class MainApp(QMainWindow):
     def initUI(self, **kwargs):
         # Create main window and layout
         self.setWindowTitle('Beachball and Waveform Plot')
-        self.setGeometry(0, 0, 1500, 500)
+        self.setGeometry(0, 0, 1500, 800)
         self.central_widget = QWidget()
         self.layout = QVBoxLayout(self.central_widget)
         self.setCentralWidget(self.central_widget)
@@ -182,7 +197,7 @@ class MainApp(QMainWindow):
 
         # Add buttons: Next Event
         self.add_button_with_label('Go to Next/Previous Event', 'Next Event >>', self.load_next_event)
-        self.add_button_with_label('', '<< Previous Event', self.load_next_event)
+        self.add_button_with_label('', '<< Previous Event', self.load_next_event, reverse=True)
 
         # Add buttons: Save edited polarity file
         self.add_button_with_label('Save Edited Polarity File', 'Save Polarity File', self.save_polarity_file)
@@ -252,14 +267,21 @@ class MainApp(QMainWindow):
             self.alt_mech_df_all = pd.read_csv(self.alt_mech_path)
             self.pol_info_df_all = pd.read_csv(self.pol_info_path)
             self.pol_df_all = pd.read_csv(self.pol_path)
-        
+
+            if kwargs.get('eq_cat_path'): # If earthquake catalog is provided
+                self.eq_df_all = pd.read_csv(kwargs.get('eq_cat_path', None), parse_dates=['time'])
+                # Merge by event_id to add time column
+                self.mech_df_all = pd.merge(
+                    self.mech_df_all, self.eq_df_all[['id', 'time']], left_on='event_id', right_on='id', how='left'
+                    ).drop(columns='id').sort_values(by='time')
+
             # Get the unique event IDs
             self.event_ids = self.mech_df_all['event_id'].unique()
-            self.load_event_data(self.current_event_index)
+            self.load_event_data(self.current_event_index, **kwargs)
+
         else:
             # Only run SKHASH to get the mechanism data
             self.initUI(**kwargs)
-            # pass
             
 
     def load_event_data(self, event_index, **kwargs):
@@ -271,10 +293,12 @@ class MainApp(QMainWindow):
         self.pol_df = self.pol_df_all.loc[self.pol_df_all['event_id'] == self.event_id]
         self.pick_pol_df = self.pick_pol_df_all.loc[self.pick_pol_df_all['event_id'] == self.event_id]
         
-        # Update the UI with the new event data
+        # Update the UI with the new event data  
         self.update_ui(**kwargs)
         
     def load_next_event(self, reverse=False):
+        # clear matplotlib figure
+        plt.close('all')
         if reverse:
             self.current_event_index = (self.current_event_index - 1) % len(self.event_ids)
         else:
@@ -287,7 +311,8 @@ class MainApp(QMainWindow):
             mech_df=mech_df, 
             alt_mech_df=alt_mech_df, 
             pol_df=pol_df, 
-            pol_info_df=pol_info_df)
+            pol_info_df=pol_info_df,
+            **kwargs)
         
         # Connect the clicked_station_signal to store_event_station
         beachball_plot.clicked_station_signal.connect(
@@ -346,7 +371,7 @@ class MainApp(QMainWindow):
         if reply == QMessageBox.Yes:
             rerun_skhash = RerunSKHASH(**kwargs)
             # Wait for the process to finish and reload the data
-            self.load_data()
+            self.load_data(**kwargs)
 
 
 # Example usage

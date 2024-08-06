@@ -269,14 +269,16 @@ def plot_mech(
     pol_df,
     pol_info_df, # this also inclus same information as pol_df + more
     alt_mech_df=None,
-    acceptable_sdr=False,
-    subplots=None,          # list of 2 integers
-    figsize=(5,5)
-    ):
+    **kwargs):
 
     '''
     Creates a plot of the mechanism with the P-polarity.
     '''
+
+    # Optional parameters
+    acceptable_sdr=kwargs.get('acceptable_sdr', False)
+    subplots=kwargs.get('subplots', None) # list of 2 integers
+    figsize=kwargs.get('figsize', (6,6))
 
     # Check if the dataframes are empty, if they are, return None
     if (len(pol_df)==0) | (len(mech_df)==0):
@@ -290,6 +292,7 @@ def plot_mech(
     # Get the indices of the P-polarity
     up_ind=np.where(pol_info_df['p_polarity']>0)[0]      ## use pol_info_df instead of pol_df if needed
     down_ind=np.where(pol_info_df['p_polarity']<0)[0]
+    zero_ind=np.where(pol_info_df['p_polarity']==0)[0]
 
     # Draw the preferred mechanism
     beach1=beach(mech_df.strike.values[0], mech_df.dip.values[0], mech_df.rake.values[0],
@@ -302,10 +305,11 @@ def plot_mech(
     else:
         fig, axes = plt.subplots(1,1,figsize=figsize)
         axes = [axes]
-    
+
+    time = mech_df.time.values[0] if 'time' in mech_df.columns else ''
     ax = axes[0]
     ax.add_collection(beach1)
-    ax.set_title(f'Event ID: {event_id}\nMechanism Quality: {mech_quality}')
+    ax.set_title(f'Event ID: {event_id}\nMechanism Quality: {mech_quality}\nTime: {time}')
     
     # Draw the acceptable mechanisms
     beach_accept=[]
@@ -325,10 +329,9 @@ def plot_mech(
         ax.add_collection(beach1_2)
         
     # Add the P-polarity (Up/Down) to the plot axis
-    if len(up_ind)>0:
-        sc_up = ax.scatter(xy[up_ind,0],xy[up_ind,1],marker='+',s=50, linewidths=.6, c='k',picker=True,zorder=3)
-    if len(down_ind)>0:
-        sc_down = ax.scatter(xy[down_ind,0],xy[down_ind,1],marker='o',s=50, linewidths=.5, edgecolor='k', facecolor='None',picker=True,zorder=3)
+    sc_up = ax.scatter(xy[up_ind, 0], xy[up_ind, 1], marker='+', s=50, linewidths=.6, c='k', picker=True, zorder=3) if len(up_ind) > 0 else None
+    sc_down = ax.scatter(xy[down_ind, 0], xy[down_ind, 1], marker='o', s=50, linewidths=.5, edgecolor='k', facecolor='None', picker=True, zorder=3) if len(down_ind) > 0 else None
+    sc_zero = ax.scatter(xy[zero_ind, 0], xy[zero_ind, 1], marker='d', s=50, linewidths=.6, c='k', picker=True, zorder=3) if len(zero_ind) > 0 else None
 
     # Add Station names to the plot axis
     sta_names = pol_info_df['sta_code'].str.split('.').str[0].values
@@ -341,8 +344,10 @@ def plot_mech(
     ax.set_aspect(1)
     ax.set_xticks([])
     ax.set_yticks([])
+    # tighen the layout
+    plt.tight_layout()
 
-    return fig, axes, sc_up, sc_down, xy, event_id
+    return fig, axes, sc_up, sc_down, sc_zero, xy, event_id
 
 def get_nearest_station(xy_clicked, xy_data, pol_info_df):
     '''

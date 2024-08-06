@@ -4,7 +4,6 @@ import pandas as pd
 # Define a class to run SKHASH with new polarities
 class RerunSKHASH:
     def __init__(self, **kwargs):
-        print(kwargs.keys())
         # Unpack common kwargs
         self.pick_pol_path = kwargs.get('pick_pol_path', None)
         self.conpfile     = kwargs.get('pol_path', None)
