@@ -196,8 +196,8 @@ class MainApp(QMainWindow):
             'Set Polarity to Zero for this station', 'Set Polarity to Zero', self.set_polarity_zero)
 
         # Add buttons: Next Event
-        self.add_button_with_label('Go to Next/Previous Event', 'Next Event >>', self.load_next_event)
-        self.add_button_with_label('', '<< Previous Event', self.load_next_event, reverse=True)
+        self.add_button_with_label('Go to Next/Previous Event', 'Next Event >>', self.load_next_event, **kwargs)
+        self.add_button_with_label('', '<< Previous Event', self.load_next_event, reverse=True, **kwargs)
 
         # Add buttons: Save edited polarity file
         self.add_button_with_label('Save Edited Polarity File', 'Save Polarity File', self.save_polarity_file)
@@ -296,14 +296,18 @@ class MainApp(QMainWindow):
         # Update the UI with the new event data  
         self.update_ui(**kwargs)
         
-    def load_next_event(self, reverse=False):
+    def load_next_event(self,reverse=False, **kwargs):
         # clear matplotlib figure
         plt.close('all')
-        if reverse:
+        
+        # Update the current event index
+        if reverse: # Previous event
             self.current_event_index = (self.current_event_index - 1) % len(self.event_ids)
-        else:
+        else: # Next event
             self.current_event_index = (self.current_event_index + 1) % len(self.event_ids)
-        self.load_event_data(self.current_event_index)
+
+        # Load the data for the next event
+        self.load_event_data(self.current_event_index, **kwargs)
 
     # define a separate func to plot beachball
     def plot_beachball_widget(self, mech_df, alt_mech_df, pol_df, pol_info_df, **kwargs):
