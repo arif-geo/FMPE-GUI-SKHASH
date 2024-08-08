@@ -101,13 +101,15 @@ class WaveformPlot(QWidget):
             xtime = np.arange(0, tr.stats.npts / tr.stats.sampling_rate, tr.stats.delta)
 
             self.ax.clear()
-            self.ax.plot(xtime, tr.data)                                # Plot waveform
-            self.ax.axvline(x=phase_time - tr.stats.starttime, color='r', linestyle='--', lw=0.5)    # plot vertical line at phase pick time
-            self.ax.text(phase_time - tr.stats.starttime - 0.5, 0.5, f"{tr.id}\nPol:{pick_df['phase_polarity'].values[0]}\nIdx{pick_df_idx}", fontsize=8)
+            self.ax.plot(xtime, tr.data)   # Plot waveform
+            self.ax.axvline(x=phase_time - tr.stats.starttime, ymin=0.4, ymax=0.6, color='r', linestyle='--', lw=0.75)    # plot vertical line at phase pick time
+            pot_txt = 'Up' if int(pick_df['phase_polarity'].values[0]) == 1 else 'Down' if int(pick_df['phase_polarity'].values[0]) == -1 else 'Zero'
+            self.ax.text(phase_time - tr.stats.starttime - 0.5, 0.5, 
+                        f"{tr.id}\nPol: {pot_txt}\nIdx{pick_df_idx}", fontsize=8)
             if hor_line:
                 self.ax.axhline(y=0, color='k', linestyle='--', lw=0.5)
             self.ax.set_title(f'Waveform for Event {event_id}, Station {station_name}')
-            self.ax.set_ylim(-1.5, 1.5)
+            self.ax.set_ylim(-2, 2)
             self.ax.set_xlabel('Time (s)')
             self.ax.set_ylabel('Amplitude [Normalized]')
             # tight_layout() 
