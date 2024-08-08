@@ -4,6 +4,37 @@ UI:
 
 <img width="677" alt="image" src="https://github.com/user-attachments/assets/04e6de0b-b106-4952-923a-48cec15f4176">
 
+
+input parameters:
+
+```
+input_params = {
+    'mech_path': mech_path,         # (outfile1) SKHASH results
+    'alt_mech_path': alt_mech_path, # (outfile2) SKHASH output accepted mechanisms
+    'pol_path': pol_path,           # SKHASH input polarities
+    'pol_info_path': pol_info_path, # (outfile_pol_info) SKHASH output polarities (same as pol_path with additional info)
+    'pol_agree_path': pol_agree_path,# (outfile_pol_agree) SKHASH output polarities with agreement
+    'stn_path': stn_path,           # Master station csv (SKHASH format)
+    'pick_pol_path': pick_pol_path, # phase picks and polarities csv (converted from pyrocko markers, filtered)
+    'eq_cat_path': eq_cat_path,     # Earthquake catalog csv
+    'mseed_dir': mseed_dir,
+    'hor_line': True,
+    'zoom': 2,
+    'slice_len': 0.5,
+    'normalize': True,
+    # beachball plot parameters
+    'acceptable_sdr': True,
+    # SKHASH control file parameters
+    'vmodel_paths': os.path.join(skhash_root_dir, 'examples/velocity_models_MTJ/vz_MTJ.txt'),
+    'max_agap': 170,
+    'delmax': 0,
+    # Rerun SKHASH parameters
+    'mini_or_ana': 'miniconda3',
+    'skhash_dir': skhash_root_dir,
+    'control_file_path': os.path.join(file_dir, 'control_file_app.txt')
+}
+```
+
 # Citation:
 
 Please cite our paper if you use anything in this project:
