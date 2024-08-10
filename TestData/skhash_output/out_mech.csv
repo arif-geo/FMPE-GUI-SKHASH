@@ -1,0 +1,4 @@
+event_id,strike,dip,rake,quality,fault_plane_uncertainty,aux_plane_uncertainty,num_p_pol,num_sp_ratios,polarity_misfit,prob_mech,sta_distribution_ratio,sp_misfit,mult_solution_flag
+nc40214567,311.7435,57.1079,-103.1305,A,23.5049,22.219,24,0,4.0,94.0,53.6,0.0,False
+nc40220958,120.0674,77.0578,-173.5308,C,37.2739,35.5897,28,0,10.5,57.0,76.9,0.0,True
+nc40220958,341.9397,42.5307,-95.7238,D,46.272,39.9769,28,0,10.1,36.4,77.0,0.0,True
