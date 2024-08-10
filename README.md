@@ -35,6 +35,11 @@ input_params = {
 }
 ```
 
+How to:
+1. Create environment with `environment.yml` file, tested on python==3.10, must have packages are numpy, pandas, obspy, pyqt5.
+2. In terminal ``` python run_app_demo.py```.
+   To change the input parameters, change values in the `input_params` in run_app_demo.py file.
+
 # Citation:
 
 Please cite our paper if you use anything in this project:
