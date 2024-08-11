@@ -2,9 +2,7 @@ FocalMechanismPolarityEditor-GUI-SkHASH. Run SkHASH using a GUI, check polaritie
 
 UI:
 
-<!-- <img width="677" alt="image" src="https://github.com/user-attachments/assets/04e6de0b-b106-4952-923a-48cec15f4176"> -->
-<!-- ![alt text](AppWindow.png) -->
-<img width="677" alt="image" src="AppWindow.png"\n>
+![alt text](AppWindow.png)
 
 
 input parameters:
