@@ -83,7 +83,8 @@ class WaveformPlot(QWidget):
             pick_df = pick_pol_df.loc[(pick_pol_df['event_id'] == event_id) & 
                                         (pick_pol_df['station_id'].str.split('.').str[1] == station_name.split('.')[0])]
             if len(pick_df) > 1:
-                pick_df = pick_df.iloc[0]
+                # select the first pick
+                pick_df = pick_df.iloc[0:1]
             pick_df_idx = pick_df.index.values[0]
             phase_time = UTCDateTime(pd.to_datetime(pick_df['phase_time'].values[0]))
 
@@ -196,7 +197,11 @@ class MainApp(QMainWindow):
         # Add buttons: Set polarity to zero
         self.add_button_with_label(
             'Set Polarity to Zero for this station', 'Set Polarity to Zero', self.set_polarity_zero)
-
+        
+        # Add button to re-set polarity to -1/1
+        self.add_button_with_label(
+            '', 'Set Polarity to -1/1', self.add_polarity)
+        
         # Add buttons: Next Event
         self.add_button_with_label('Go to Next/Previous Event', 'Next Event >>', self.load_next_event, **kwargs)
         self.add_button_with_label('', '<< Previous Event', self.load_next_event, reverse=True, **kwargs)
@@ -359,6 +364,37 @@ class MainApp(QMainWindow):
             self.pick_pol_df_all.loc[idx, 'phase_polarity'] = 0
             self.pick_pol_df.loc[idx, 'phase_polarity'] = 0
             print('after', self.pick_pol_df_all.loc[idx, 'phase_polarity'])
+    
+    def add_polarity(self):
+        if self.event_id and self.station_name:
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle('Set Polarity to -1/1')
+            msg_box.setText('Please choose an option:')
+
+            # add cutom buttons
+            btn_minus_one = QPushButton('-1')
+            btn_plus_one = QPushButton('1')
+            btn_no_thanks = QPushButton('No Thanks')
+
+            msg_box.addButton(btn_minus_one, QMessageBox.ActionRole)
+            msg_box.addButton(btn_plus_one, QMessageBox.ActionRole)
+            msg_box.addButton(btn_no_thanks, QMessageBox.RejectRole)
+
+            # execute the message box and handle the response
+            response = msg_box.exec_()
+            
+            if response == 0: # -1
+                btn_value = -1
+            elif response == 1: # 1
+                btn_value = 1
+            else:
+                return # return to the main window without changing the polarity
+
+            idx = self.idx_in_pick_pol_df(self.event_id, self.station_name, self.pick_pol_df_all)
+            print('before', self.pick_pol_df_all.loc[idx, 'phase_polarity'])
+            self.pick_pol_df_all.loc[idx, 'phase_polarity'] = btn_value
+            self.pick_pol_df.loc[idx, 'phase_polarity'] = btn_value
+            print('after', self.pick_pol_df_all.loc[idx, 'phase_polarity'])
 
     def save_polarity_file(self):
         reply = QMessageBox.question(
@@ -382,53 +418,33 @@ class MainApp(QMainWindow):
 
 # Example usage
 if __name__ == '__main__':
-    import os 
-
-    user = 'mdarifulislam'
-
-    # Define the paths (Use absolute paths in most cases)
-    file_dir      = f'/Users/{user}/Library/CloudStorage/OneDrive-IndianaUniversity/Research/Github/FM2STRESS/FM2STRESS_project/data/NCEDC_picks/HASH_IN_OUT'
-    mseed_dir     = f'/Users/{user}/Library/CloudStorage/OneDrive-IndianaUniversity/Research/Data/NCEDC_events_data/mseed/2008'
-    mech_path     = os.path.join(file_dir, 'OUT/out_NC_PN_QC_2008.csv')
-    alt_mech_path = os.path.join(file_dir, 'OUT/out2_NC_PN_QC_2008.csv')
-    pol_info_path = os.path.join(file_dir, 'OUT/out_polinfo_NC_PN_QC_2008.csv')
-    pol_agree_path= os.path.join(file_dir, 'OUT/out_polagree_NC_PN_QC_2008.csv') 
-    pol_path      = os.path.join(file_dir, 'IN/pol_concensus_NC_PN_QC_2008.csv')
-    stn_path      = os.path.join(file_dir, 'IN/station_master.csv')
-    pick_pol_path = f'/Users/{user}/Library/CloudStorage/OneDrive-IndianaUniversity/Research/Data/NCEDC_events_data/Markers/2008_pyrocko_markers_filt.csv'
-    skhash_root_dir = os.path.abspath('FM2STRESS_project/code/InteractiveFM/SKHASH2/SKHASH')
-
-    # Make app and window for beachball plot
     app = QApplication([])
 
     input_params = {
-        'mech_path': mech_path,         # (outfile1) SKHASH results
-        'alt_mech_path': alt_mech_path, # (outfile2) SKHASH output accepted mechanisms
-        'pol_path': pol_path,           # SKHASH input polarities
-        'pol_info_path': pol_info_path, # (outfile_pol_info) SKHASH output polarities (same as pol_path with additional info)
-        'pol_agree_path': pol_agree_path,# (outfile_pol_agree) SKHASH output polarities with agreement
-        'stn_path': stn_path,           # Master station csv (SKHASH format)
-        'pick_pol_path': pick_pol_path, # phase picks and polarities csv (converted from pyrocko markers, filtered)
-        'mseed_dir': mseed_dir,
+        'mech_path': 'TestData/skhash_output/out_mech.csv',
+        'alt_mech_path': 'TestData/skhash_output/out2_alt_mech.csv',
+        'pol_path': 'TestData/skhash_input/pol_concensus.csv',
+        'pol_info_path': 'TestData/skhash_output/out_polinfo.csv',
+        'stn_path': 'TestData/skhash_input/Station_master_skhash_format.csv',
+        'pick_pol_path': 'TestData/skhash_input/PhasePicks_my_standard.csv',
+        'mseed_dir': 'TestData/mseed',
         'hor_line': True,
         'zoom': 2,
         'slice_len': 0.5,
         'normalize': True,
+        # beachball plot parameters
+        'acceptable_sdr': False,
         # SKHASH control file parameters
-        'vmodel_paths': os.path.join(skhash_root_dir, 'examples/velocity_models_MTJ/vz_MTJ.txt'),
+        'vmodel_paths': 'SKHASH2/SKHASH/examples/velocity_models_MTJ/vz_MTJ.txt',
         'max_agap': 170,
         'delmax': 0,
         # Rerun SKHASH parameters
         'mini_or_ana': 'miniconda3',
-        'skhash_dir': skhash_root_dir,
-        'control_file_path': os.path.join(file_dir, 'control_file_app.txt')
+        'skhash_dir': 'SKHASH2/SKHASH',
+        'control_file_path': 'TestData/control_file_app.txt'
     }
 
-    # Make app and window for beachball and waveform plot
     main_window = MainApp(**input_params)
-
-    # Show the main window
     main_window.show()
 
-    # Execute the application
-    app.exec_()   
+    app.exec_()

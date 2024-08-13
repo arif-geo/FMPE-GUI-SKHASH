@@ -38,7 +38,7 @@ input_params = {
     'slice_len': 0.5,
     'normalize': True,
     # beachball plot parameters
-    'acceptable_sdr': True,
+    'acceptable_sdr': False,
     # SKHASH control file parameters
     'vmodel_paths': os.path.join(skhash_root_dir, 'examples/velocity_models_MTJ/vz_MTJ.txt'),
     'max_agap': 170,

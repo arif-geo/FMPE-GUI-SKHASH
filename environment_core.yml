@@ -1,0 +1,15 @@
+name: geoconda
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - mamba
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - obspy
+  - jupyter
+  - pyqt
+  - pygmt
+  - mplcursors
