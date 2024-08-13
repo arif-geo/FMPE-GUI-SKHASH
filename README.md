@@ -44,9 +44,7 @@ How to:
 
 Please cite our paper if you use anything in this project:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13240156.svg)](https://doi.org/10.5281/zenodo.13240156)
-
-Islam. (2024). arif-geo/FMPE-GUI-SKHASH: FocalMechanism (FocalMechanism). Zenodo. https://doi.org/10.5281/zenodo.13240156
+Islam, M. A. (2024). arif-geo/FMPE-GUI-SKHASH: FocalMechanism (0.1). Zenodo. https://doi.org/10.5281/zenodo.13240155 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13240156.svg)](https://doi.org/10.5281/zenodo.13240156)
 
 Skoumal, R.J., Hardebeck, J.L., Shearer, P.M. (2024). SKHASH: A Python package for computing earthquake focal mechanisms. Seismological Research Letters, 95(4), 2519-2526. https://doi.org/10.1785/0220230329
 
