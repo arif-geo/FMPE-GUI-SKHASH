@@ -160,11 +160,18 @@ class MainApp(QMainWindow):
         self.stn_path = kwargs.get('stn_path', None)
         self.pick_pol_path = kwargs.get('pick_pol_path', None)
         self.mseed_dir = kwargs.get('mseed_dir', None)
+        self.resumer = kwargs.get('current_event_index', None)
+        # if the 'resumer' file exist read as text or write a new one
+        if not os.path.exists(self.resumer):
+            with open(self.resumer, 'w') as f:
+                f.write('0')
+        with open(self.resumer, 'r') as f:
+            # read the first line as integer
+            self.current_event_index = int(f.readline())
 
         # Initialize event_id and station_name to None
         self.event_id = None
         self.station_name = None
-        self.current_event_index = 0
         
         # Load all data to start with
         self.initUI(**kwargs)
@@ -248,6 +255,10 @@ class MainApp(QMainWindow):
             
         # Update the splitter to reflect changes
         self.splitter.update()
+
+        # update the current event index in the resumer file
+        with open(self.resumer, 'w') as f:
+            f.write(str(self.current_event_index))
 
 
     def add_button_with_label(self, label_text, button_text, callback, **kwargs):
