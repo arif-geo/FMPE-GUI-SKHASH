@@ -309,7 +309,7 @@ def plot_mech(
     time = mech_df.time.values[0] if 'time' in mech_df.columns else ''
     ax = axes[0]
     ax.add_collection(beach1)
-    ax.set_title(f'Event ID: {event_id}\nMechanism Quality: {mech_quality}\nTime: {time}')
+    ax.set_title(f'{event_id} Quality: {mech_quality}\nTime: {str(time)[:16]}')
     
     # Draw the acceptable mechanisms
     beach_accept=[]

@@ -25,6 +25,9 @@ class BeachballPlot(QWidget):
         self.pol_df = pol_df
         self.pol_info_df = pol_info_df
 
+        # Randomly select few alt_mech_df rows
+        self.alt_mech_df = self.alt_mech_df.sample(n=50, random_state=1) 
+
         # Plot the mechanism using pre-defined data
         fig, ax, sc_up, sc_down, sc_zero, xy_data, event_id = plot_mech(
             self.mech_df, self.pol_df, self.pol_info_df, self.alt_mech_df, **kwargs)
@@ -36,6 +39,9 @@ class BeachballPlot(QWidget):
         self.sc_zero = sc_zero
         self.xy_data = xy_data
         self.event_id = event_id
+
+        # add text to the existing plot title
+        self.ax[0].set_title(f'{self.ax[0].get_title()}\nClick on a polrities to see the waveform')
 
         # Connect pick event to onpick function with signal emission
         self.fig.canvas.mpl_connect('pick_event', self.onpick)
@@ -180,7 +186,7 @@ class MainApp(QMainWindow):
 
     def initUI(self, **kwargs):
         # Create main window and layout
-        self.setWindowTitle('Beachball and Waveform Plot')
+        self.setWindowTitle(f'Beachball and Waveform Plot')
         self.setGeometry(0, 0, 1500, 800)
         self.central_widget = QWidget()
         self.layout = QVBoxLayout(self.central_widget)
@@ -230,13 +236,16 @@ class MainApp(QMainWindow):
         self.splitter.addWidget(self.waveform_frame)
 
     def update_ui(self, **kwargs):
+        if os.path.exists(self.mech_path):
+            self.setWindowTitle(f'Beachball and Waveform Plot [{self.current_event_index+1}/{len(pd.read_csv(self.mech_path)["event_id"].unique())}]')
 
         # Create new layouts for the frames
         beachball_layout = QVBoxLayout()
         waveform_layout = QVBoxLayout()
 
         # Create the beachball and waveform plots
-        self.bb_plot = self.plot_beachball_widget(self.mech_df, self.alt_mech_df, self.pol_df, self.pol_info_df, **kwargs)
+        self.bb_plot = self.plot_beachball_widget(
+            self.mech_df, self.alt_mech_df, self.pol_df, self.pol_info_df, **kwargs)
         self.wf_plot = WaveformPlot() # Inputs for this plot will be added in Func 'plot_beachball_widget' by calling 'store_event_station'
 
         # Add plots to their respective layouts
@@ -286,12 +295,13 @@ class MainApp(QMainWindow):
             self.pol_info_df_all = pd.read_csv(self.pol_info_path)
             self.pol_df_all = pd.read_csv(self.pol_path)
 
-            if kwargs.get('eq_cat_path'): # If earthquake catalog is provided
+            if kwargs.get('eq_cat_path'):
                 self.eq_df_all = pd.read_csv(kwargs.get('eq_cat_path', None), parse_dates=['time'])
+                if not 'time' in self.mech_df_all.columns:
                 # Merge by event_id to add time column
-                self.mech_df_all = pd.merge(
-                    self.mech_df_all, self.eq_df_all[['id', 'time']], left_on='event_id', right_on='id', how='left'
-                    ).drop(columns='id').sort_values(by='time')
+                    self.mech_df_all = pd.merge(
+                        self.mech_df_all, self.eq_df_all[['id', 'time']], left_on='event_id', right_on='id', how='left'
+                        ).drop(columns='id').sort_values('time')
 
             # Get the unique event IDs
             self.event_ids = self.mech_df_all['event_id'].unique()
