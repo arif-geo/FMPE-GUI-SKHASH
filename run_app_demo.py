@@ -4,8 +4,9 @@ from PyQt5.QtWidgets import QApplication
 # Import sef-defined modules
 from fun_beachball_widget import MainApp
 
-# Define the paths (Use absolute paths in most cases)
-file_dir      = os.path.abspath('./TestData')
+# Define the paths relative to this file (works from any working directory)
+repo_dir = os.path.dirname(os.path.abspath(__file__))
+file_dir = os.path.join(repo_dir, 'TestData')
 # output files (will be created if not provided)
 mech_path     = os.path.join(file_dir, 'skhash_output/out_mech.csv')
 alt_mech_path = os.path.join(file_dir, 'skhash_output/out2_alt_mech.csv')
@@ -17,7 +18,7 @@ stn_path      = os.path.join(file_dir, 'skhash_input/Station_master_skhash_forma
 pick_pol_path = os.path.join(file_dir, 'skhash_input/PhasePicks_my_standard.csv')
 eq_cat_path   = os.path.join(file_dir, 'skhash_input/NCEDC_eq_cat_above_slab.csv')
 mseed_dir     = os.path.join(file_dir, 'mseed')
-skhash_root_dir = os.path.abspath('SKHASH2/SKHASH')
+skhash_root_dir = os.path.join(repo_dir, 'SKHASH2', 'SKHASH')
 
 # Make app and window for beachball plot
 app = QApplication([])
@@ -45,7 +46,8 @@ input_params = {
     # Rerun SKHASH parameters
     'mini_or_ana': 'miniconda3',
     'skhash_dir': skhash_root_dir,
-    'control_file_path': os.path.join(file_dir, 'control_file_app.txt')
+    'control_file_path': os.path.join(file_dir, 'control_file_app.txt'),
+    'current_event_index': os.path.join(repo_dir, 'resumer')
 }
 
 # Make app and window for beachball and waveform plot

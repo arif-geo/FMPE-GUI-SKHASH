@@ -166,7 +166,9 @@ class MainApp(QMainWindow):
         self.stn_path = kwargs.get('stn_path', None)
         self.pick_pol_path = kwargs.get('pick_pol_path', None)
         self.mseed_dir = kwargs.get('mseed_dir', None)
-        self.resumer = kwargs.get('current_event_index', None)
+        self.resumer = kwargs.get('current_event_index') or os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'resumer'
+        )
         # if the 'resumer' file exist read as text or write a new one
         if not os.path.exists(self.resumer):
             with open(self.resumer, 'w') as f:
